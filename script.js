@@ -150,3 +150,29 @@ btnTransfer.addEventListener('click', function (e) {
     updateUi(cAccount);
   }
 });
+
+btnClose.addEventListener('click', function (e) {
+  e.preventDefault();
+
+  if (
+    cAccount.username === inputCloseUsername.value &&
+    cAccount.pin === Number(inputClosePin.value)
+  ) {
+    const accIndex = accounts.findIndex(
+      acc => acc.username === cAccount.username
+    );
+    accounts.splice(accIndex, 1);
+    console.log(accounts);
+    containerApp.style.opacity = 0;
+  }
+});
+
+btnLoan.addEventListener('click', function (e) {
+  e.preventDefault();
+  const amount = Number(inputLoanAmount.value);
+  if (amount > 0 && cAccount.movements.some(mov => mov >= amount * 0.1)) {
+    cAccount.movements.push(amount);
+    updateUi(cAccount);
+  }
+  inputLoanAmount.value = '';
+});
