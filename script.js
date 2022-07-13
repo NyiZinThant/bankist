@@ -92,6 +92,13 @@ const formatDate = function (date) {
   return `${day}/${month}/${year}`;
 };
 
+const formatCurr = function (account, amount) {
+  return new Intl.NumberFormat(account.locale, {
+    style: 'currency',
+    currency: account.currency,
+  }).format(amount);
+};
+
 const displayMovement = function (account, sort = false) {
   containerMovements.innerHTML = '';
   const movs = sort
@@ -100,6 +107,7 @@ const displayMovement = function (account, sort = false) {
   movs.forEach(function (mov, i) {
     const date = new Date(account.movementsDates[i]);
     const displayDate = formatDate(date);
+    const formattedCurr = formatCurr(account, mov);
     const type = mov > 0 ? 'deposit' : 'withdrawal';
     const html = `
     <div class="movements__row">
@@ -107,7 +115,7 @@ const displayMovement = function (account, sort = false) {
       i + 1
     } ${type}</div>
         <div class="movements__date">${displayDate}</div>
-        <div class="movements__value">${mov.toFixed(2)}€</div>
+        <div class="movements__value">${formattedCurr}</div>
     </div>`;
     containerMovements.insertAdjacentHTML('afterbegin', html);
   });
@@ -115,7 +123,7 @@ const displayMovement = function (account, sort = false) {
 
 const displayBalance = function (acc) {
   acc.balance = acc.movements.reduce((acc, curr) => acc + curr);
-  labelBalance.textContent = `${acc.balance.toFixed(2)} EUR`;
+  labelBalance.textContent = formatCurr(acc, acc.balance);
 };
 
 const displaySummary = function (account) {
@@ -123,18 +131,19 @@ const displaySummary = function (account) {
     .filter(mov => mov > 0)
     .reduce((acc, mov) => (acc += mov), 0);
   labelSumIn.textContent = `${income.toFixed(2)} €`;
+  labelSumIn.textContent = formatCurr(account, income);
 
   const outcome = account.movements
     .filter(mov => mov < 0)
     .reduce((acc, mov) => (acc += mov), 0);
-  labelSumOut.textContent = `${Math.abs(outcome.toFixed(2))} €`;
+  labelSumOut.textContent = formatCurr(account, Math.abs(outcome));
 
   const interest = account.movements
     .filter(mov => mov > 0)
     .map(mov => (mov * account.interestRate) / 100)
     .filter(mov => mov >= 1)
     .reduce((acu, mov) => acu + mov, 0);
-  labelSumInterest.textContent = `${Math.abs(interest.toFixed(2))} €`;
+  labelSumInterest.textContent = formatCurr(account, Math.abs(interest));
 };
 
 const updateUi = function (account) {
@@ -157,13 +166,14 @@ btnLogin.addEventListener('click', function (e) {
     inputLoginPin.value = inputLoginUsername.value = '';
     // Display Current Date
     const now = new Date();
-    const day = `${now.getDate()}`.padStart(2, 0);
-    const month = `${now.getMonth() + 1}`.padStart(2, 0);
-    const year = now.getFullYear();
-    const hour = `${now.getHours()}`.padStart(2, 0);
-    const min = `${now.getMinutes()}`.padStart(2, 0);
+    labelDate.textContent = new Intl.DateTimeFormat('en-US').format(now);
+    // const day = `${now.getDate()}`.padStart(2, 0);
+    // const month = `${now.getMonth() + 1}`.padStart(2, 0);
+    // const year = now.getFullYear();
+    // const hour = `${now.getHours()}`.padStart(2, 0);
+    // const min = `${now.getMinutes()}`.padStart(2, 0);
 
-    labelDate.textContent = `${day}/${month}/${year}, ${hour}:${min}`;
+    // labelDate.textContent = `${day}/${month}/${year}, ${hour}:${min}`;
     // Display UI messages
     labelWelcome.textContent = `Welcome back, ${cAccount.owner}`;
     containerApp.style.opacity = 1;
